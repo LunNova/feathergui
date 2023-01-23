@@ -45,7 +45,14 @@
           #   cp -r . $out/build-dump
           # '';
         };
-      in {
+        # just clang-format from clang-tools in /bin
+        # so we don't pollute devshell PATH with lots of clang binaries
+        clang-format = pkgs.runCommand "clang-format" { } ''
+          mkdir -p $out/bin
+          ln -s ${pkgs.clang-tools}/bin/clang-format $out/bin/clang-format
+        '';
+      in
+      {
         packages = {
           fgOpenGL = backends;
           sail = pkgs.stdenv.mkDerivation {
@@ -69,6 +76,7 @@
             scopes.packages.${system}.scopes
             backends
             pkgs.cjson
+            clang-format
             selfpkgs.sail
           ];
 
@@ -76,8 +84,6 @@
             export LD_LIBRARY_PATH=${devshell-ldpath}:$LD_LIBRARY_PATH
           '';
         };
-      })) // {
-
-      };
+      })) // { };
 
 }
