@@ -55,6 +55,17 @@
             cmakeFlags = [ "-DSAIL_COMBINE_CODECS=ON" ];
             buildInputs =
               [ pkgs.cmake pkgs.libpng pkgs.libjpeg_turbo pkgs.libwebp ];
+            postInstall = ''
+              # This shouldn't be needed as sail generates correct pkg-config files
+              # but scopes doesn't use it and we were relying on nix magically putting
+              # the include in as an '-isystem' include.
+              # the nixpkgs default adds /include regardless of what the pkg-config files request
+              # so we manually add the correct path
+              mkdir "$out/nix-support" || true
+              cat <<- EOD > $out/nix-support/setup-hook
+                export NIX_CFLAGS_COMPILE="\''${NIX_CFLAGS_COMPILE:-} -isystem $out/include/sail"
+              EOD
+            '';
           };
         };
         devShell = pkgs.mkShell {
