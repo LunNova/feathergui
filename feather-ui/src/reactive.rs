@@ -220,7 +220,6 @@ fn notify_children_change(nodeid: &SignalNodeId) {
         assert!(!Rc::ptr_eq(&nodeid.0, &child.0));
         notify_change_node(child);
     }
-    node.children.iter().for_each(notify_change_node);
 }
 
 fn add_dependency(parent: &SignalNodeId, child: SignalNodeId) {
@@ -725,7 +724,8 @@ impl<PList: ProviderTupleList> Signal<ZipProvider<PList>> {
         <PList as ProviderTupleList>::RefResult: UnsafeRefCloneTupleList,
     {
         let node = new_node::<Self>(NodeColor::Changed);
-        add_dependency(self.0.get_node(), node.clone());
+        // HACK HACK HACK should not need to bodge around ZipValueProvider???
+        self.0.providers.add_dependency(node.clone());
         verify_tree(&node);
         Signal(Rc::new(ZipValueProvider::<PList> {
             providers: self.0.providers.clone(),

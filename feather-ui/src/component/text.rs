@@ -78,6 +78,15 @@ where
         let wdriver4 = wdriver.clone();
         let wdriver5 = wdriver.clone();
 
+        // question mark
+        let content = (
+            self.text.clone(),
+            self.attributes.clone(),
+            self.align.clone(),
+        )
+            .zip()
+            .value();
+
         let text_buffer = MutableSignal::<cosmic_text::Buffer, _>::new_inputs(
             cosmic_text::Buffer::new(
                 &mut driver2.font_system.write(),
@@ -114,13 +123,7 @@ where
                     },
                 ),
                 (
-                    (
-                        self.text.clone(),
-                        self.attributes.clone(),
-                        self.align.clone(),
-                    )
-                        .zip()
-                        .value(),
+                    content.clone(),
                     move |b: &mut cosmic_text::Buffer,
                           (text, attrs, align): &(
                         String,
@@ -144,15 +147,17 @@ where
                         self.props.area(),
                         self.props.padding(),
                         inner_limits.clone(),
+                        content,
                     )
                         .zip()
                         .value(),
                     move |buffer: &mut cosmic_text::Buffer,
-                          (dpi, area, padding, limits): &(
+                          (dpi, area, padding, limits, _content): &(
                         crate::RelDim,
                         crate::DRect,
                         crate::DAbsRect,
                         crate::Limits<crate::Pixel>,
+                        (String, cosmic_text::AttrsOwned, Option<cosmic_text::Align>),
                     )| {
                         let padding = padding.as_perimeter(*dpi);
                         if let Some(driver) = wdriver5.upgrade() {

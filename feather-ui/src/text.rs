@@ -344,4 +344,10 @@ pub fn copy_buffer(
             cosmic_text::Shaping::Advanced,
         ));
     }
+
+    // BufferLine::set_text clears the shape + layout caches via reset().
+    // Buffer::set_size only reshapes when width/height actually change, so
+    // if only the text content changed the shapes would never be rebuilt and
+    // layout_runs() would return nothing and the text disappears
+    dest.shape_until_scroll(font_system, false);
 }
